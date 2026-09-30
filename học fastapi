@@ -1,0 +1,213 @@
+cấu trúc
+myproject/
+|__.env
+├── app/
+|   ├── __init__.py
+│   ├── main.py                    # Khởi tạo FastAPI app, đăng ký router, middleware
+│   ├── config.py                    # Settings (đọc .env, tương đương settings.py Django)
+│   ├── database.py                 # Kết nối DB, session
+│   ├── exceptions.py               # Custom exception + exception handlers
+│   ├── middleware.py               # Custom middleware (logging, CORS...)
+│   │
+│   ├── api/
+        ├── __init__.py
+│   │   └── router.py                # Gộp toàn bộ router con lại (tương đương urls.py gốc Django)
+│   │
+│   ├── donate/                       # MỖI DOMAIN 1 THƯ MỤC — tương đương "app" trong Django
+        ├── __init__.py
+│   │   ├── router.py                  # Endpoint (tương đương views.py)
+│   │   ├── models.py                  # SQLAlchemy models
+│   │   ├── schemas.py                 # Pydantic schemas (tương đương serializers.py)
+│   │   ├── service.py                  # Business logic (giống hệt services.py đã dùng)
+│   │   └── dependencies.py           # Depends() riêng (tương đương permissions.py)
+        ├── selectors.py
+│   │
+│   ├── friendship/
+        ├── __init__.py
+│   │   ├── router.py
+│   │   ├── models.py
+│   │   ├── schemas.py
+│   │   └── service.py
+        ├── selectors.py
+│   │
+│   └── notification/
+        ├── __init__.py
+│       ├── router.py
+│       ├── models.py
+│       ├── schemas.py
+│       └── service.py
+│       ├── selectors.py
+├── tests/
+│   ├── test_donate.py
+│
+
+- #lệnh granian --interface asgi --host 0.0.0.0 --port 8000 --workers 3 --runtime-threads 6 --backlog 2048 --reload --http 1 app.main:app
+- /docs vào giao diện swagger k cần cài
+
+Django ORM = SQLAlchemy
+serializers = pydentic(BaseModel)
+
+- luồng logic:
+    POST: Request -> Router -> Schema(validate) -> Service -> DB -> return
+    GET: Request -> Router -> Service -> DB -> Schema(Output) -> Response
+
+Combo
+    FastAPI + Pydentic(serializers) + SqlAlchemy(models.Model) + Alembic(migration khi tạo bảng và khi sửa bản(mặc định create_all engine k tự thay khi sửa)) và PyMySQL(nếu dùng mysql)
+
+ORM của sync:
+instance = Tên bảng muốn lấy
+        db.query(instance).all() : lấy tất cả bản ghi của bảng
+        db.query(instance).first() | db.query(instance).filter(instance.id == 1).first() : lấy bản ghi đầu tiên của bảng
+        db.query(instance).filter(instance.id == 1).all() : lấy bản ghi của bảng theo điều kiện
+        db.query(instance).get(id=1)
+        db.query(instance).order_by(instance.id.desc()): sắp theo thứ tự id
+        db.query(instance).count()
+        db.add(instance) and db.commit()
+        db.delete(instance) and db.commit()
+        db.query(instance).filter(instance.published == True).delete(): xóa hàng loạt theo điều kiện
+        db.query(instance).filter(instance.age >= 18, instance.age <= 30).all() : filter theo nhiều điều kiện
+                                                                        .exists() : kiểm tra có bản ghi tồn tại theo điều kiện 
+        db.query(Todo).filter(Todo.id == id).update({"title": "Tiêu đề mới"}) : update bulk
+        todos = db.query(Todo).options(joinedload(Todo.owner)).all()   # JOIN sẵn, chỉ 1 query
+có 2 cách xóa 1 là "db.delete(instance)", 2 là xóa trên câu query cho bulk delete "db.query(Todo).filter(Todo.is_completed == True).delete(synchronize_session=False)"
+
+ORM của async:
+
+    (await db.execute(select(Todo))).scalars().all()
+    → lấy tất cả Todo
+
+    (await db.execute(select(Todo).filter(Todo.age >= 18))).scalars().all()
+    → lấy tất cả Todo có age >= 18
+
+    (await db.execute(select(Todo))).scalars().first()
+    → lấy Todo đầu tiên
+
+    (await db.execute(select(Todo).filter(Todo.age >= 18))).scalars().first()
+    → lấy Todo đầu tiên có age >= 18
+
+    await db.get(Todo, 1)
+    → lấy Todo có ID = 1
+
+    (await db.execute(select(Todo).order_by(Todo.id.desc()))).scalars().all()
+    → lấy tất cả Todo, sắp xếp ID giảm dần
+
+    (await db.execute(select(func.count()).select_from(Todo))).scalar()
+    hoặc select(func.count()).select_from(Model).where(condition).scalar()
+    → đếm số Todo
+
+    await db.execute(update(Todo).filter(Todo.id == 1).values(title="New"))
+    → update Todo có ID = 1
+
+    select(Todo).where((Todo.age >= 18) & (Todo.age <= 30))  # AND
+    select(Todo).where((Todo.age >= 18) | (Todo.age <= 10))  # OR
+    select(Todo).where(((Todo.age >= 18) | (Todo.age <= 10)) & (Todo.published == True))  # (A OR B) AND C
+
+    await db.execute(delete(Todo).filter(Todo.id == 1))
+    → xóa Todo có ID = 1
+
+    db.add(todo)
+    await db.commit()
+    → thêm Todo
+
+    await db.delete(todo)
+    await db.commit()
+    → xóa Todo
+
+
+- alembic:
+    1.pip install alembic
+    2.alembic init alembic cho sync hoặc alembic init -t async alembic nếu async
+    3.setting lại alembic.ini theo dường dẫn sql mysql+pymysql://user:password@localhost/dbname
+    4.vào alembic.env import tất cả model ở file models.py vào 
+        from app.database import Base
+        from app.models import *
+        target_metadata = Base.metadata
+
+    5.alembic revision --autogenerate -m "create todo table"
+    6.alembic upgrade head
+
+Các thư viện
+    pip install alembic : hỗ trợ migrate
+    pip install fastapi
+    pip install granian
+    pip install pydantic: schema giống serializer
+    pip instal pymysql: driver hỗ trợ mysql sync | pip install "sqlalchemy[asyncio]" asyncmy: driver hỗ trợ async
+    pip instal sqlalchemy: ORM cho db
+    pip install "pwdlib[argon2,bcrypt]" : hashing password
+    pip install pyjwt : thư viện jwt
+
+    #XÁC THỰC
+    pip install fastapi-users[sqlalchemy]: thư viện có sẵn endpoint cho xác thực
+    #CHỨA ẢNH/VIDEO
+    pip install imagekitio
+#========================================================================================
+Cấu trúc mẫu
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
+
+# todo/models.py
+class TodoCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+# todo/schemas.py
+class TodoCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+# todo/service.py
+def create_todo(db: Session, data: TodoCreate, owner_id: int = Depends(get_current_user_id)) -> Todo: #hoặc list[Todo]
+    todo = Todo(title=data.title, description=data.description, owner_id=owner_id)
+    db.add(todo)
+    db.commit()
+    db.refresh(todo)
+    return todo
+
+# todo/router: gọi lại services kiểu views.py gọi service bên djrf
+@router.post("/", response_model=TodoResponse)
+def create_todo(data: TodoCreate, db: Session = Depends(get_db)):
+    return service.create_todo(db, data, owner_id=1)
+
+# todo/exceptions.py : raise lỗi gì
+class TodoPermissionDenied(HTTPException):
+    def __init__(self):
+        super().__init__( # khi gọi tới hàm này thì gọi constructor của TodoPermissionDenied, sau đó super lại gọi constructor(init) từ class Cha là HTTPException
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn không có quyền thao tác trên todo này"
+        )
+
+# todo/selectors.py
+def get_todo(db: Session, todo_id: int) -> Todo:
+    todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    if not todo:
+        raise TodoNotFound(todo_id)
+    return todo
+
+# todo/dependencies.py : dùng như permission xem ai có quyền, check quyền là chính
+def verify_todo_owner(todo_id: int, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)) -> Todo:
+    todo = get_todo(db, todo_id)
+    if todo.owner_id != current_user_id:
+        raise TodoPermissionDenied()
+    return todo
+def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
+    user_id = decode_jwt(token)
+    if not user_id:
+        raise HTTPException(401, "Chưa đăng nhập")
+    return
+
+dependencies sẽ check cái này có quyền gì, ai có quyền gì và raise lỗi exception, check quyền trước khi thực thi hàm luôn thuộc về permission
+services.py thì check bussiness logic và raise exception. Exeption chỉ là nơi chứa mã lỗi và detail
+bussiness logic là những thứ chung cho toàn hệ thống, còn riêng là thuộc permission, ví dụ user A có thể kết bạn với 1200 người mà user B chỉ có thể 1000
+
+transaction: with db.begin():
+db.flush(): dùng để có được dữ liệu cần có mà chưa cần commit. Bên django chỉ cần create là có data khac với sqlalchemy cần phải add vào bộ nhớ rồi gửi xuống db
+    ví dụ:
+    def create_todo_with_log(db: Session, data: TodoCreate, user_id: int):
+        todo = Todo(title=data.title, user_id=user_id)
+        db.add(todo)
+        db.flush()   # ÉP SQLAlchemy chạy INSERT ngay, todo.id GIỜ ĐÃ CÓ (ví dụ 7)
+        log = ActivityLog(todo_id=todo.id, action="created")   # todo.id = 7, ĐÚNG
+        db.add(log)
+        db.commit()   # chốt CẢ HAI cùng lúc: todo và log
+
+        # autoflush=True : SQLAlchemy TỰ ĐỘNG gọi flush() TRƯỚC dòng query()
