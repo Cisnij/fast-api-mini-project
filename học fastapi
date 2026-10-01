@@ -139,7 +139,7 @@ Các thư viện
     #XÁC THỰC
     pip install fastapi-users[sqlalchemy]: thư viện có sẵn endpoint cho xác thực
     #CHỨA ẢNH/VIDEO
-    pip install imagekitio
+    pip install "imagekitio[aiohttp]"
 #========================================================================================
 Cấu trúc mẫu
 from pydantic import BaseModel, ConfigDict

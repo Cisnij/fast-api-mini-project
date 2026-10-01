@@ -8,5 +8,5 @@ class PostResponse(BaseModel):
     url:str
     file_type:str
     file_name:str
-    file_size:str
+    file_size:int
     created_at: datetime
