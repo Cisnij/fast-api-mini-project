@@ -23,3 +23,5 @@ async def get_db(): # gọi tới sẽ khởi tạo session và trả về sessi
 
 class Base(DeclarativeBase):
     pass
+
+

@@ -1,7 +1,8 @@
 import datetime
 import uuid
 
-from sqlalchemy import Integer, Column, Uuid, Text, String, DateTime
+from sqlalchemy import Integer, Column, Uuid, Text, String, DateTime, ForeignKey
+from sqlalchemy.orm import Relationship
 
 from app.core.database import Base
 from datetime import datetime
@@ -18,7 +19,10 @@ class Post(Base):
     file_size = Column(Integer,nullable=False)
     created_at = Column(DateTime,default=datetime.now)
 
+    user= Relationship("User",back_populates="posts")
+    user_id = Column(Uuid,ForeignKey("users.id"),nullable=False) #users.id phải theo tên bảng là users
     # cách gộp index để tối ưu nếu filter nhiều field
     # __table_args__ = (
+        # tên idex + cột
     #     Index("ix_user_published", "user_id", "published"),   # composite index, giống models.Index nhiều field
     # )

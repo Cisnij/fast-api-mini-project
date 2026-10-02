@@ -113,6 +113,32 @@ ORM của async:
     await db.commit()
     → xóa Todo
 
+    mối quan hệ phàn thân:
+    class Message(Base):
+        __tablename__ = "messages"
+        reply_to_id = Column(
+            ForeignKey("messages.id"),
+            nullable=True
+        )
+
+        reply_to = relationship(
+            "Message",
+            remote_side=[id] # phân biệt id nào đc trỏ tới ví dụ A reply B là trỏ tới A
+        )
+
+    mối quan hệ M-M
+    class Follow(Base):
+        __tablename__ = "follows"
+
+        follower_id = Column(
+            ForeignKey("users.id", ondelete="CASCADE"),
+            primary_key=True,
+        )
+
+        following_id = Column(
+            ForeignKey("users.id", ondelete="CASCADE"),
+            primary_key=True,
+        )
 
 - alembic:
     1.pip install alembic
