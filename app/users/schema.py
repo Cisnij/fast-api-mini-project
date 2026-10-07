@@ -1,13 +1,19 @@
 import uuid
 from fastapi_users import schemas
+from fastapi_users.schemas import CreateUpdateDictModel
+from pydantic import EmailStr, BaseModel
 
-
-class UserRead(schemas.BaseUser[uuid.UUID]):
+class UserRead(BaseModel):
     name: str
+    email: EmailStr
+    class Config:
+        from_attributes = True
 
 
-class UserCreate(schemas.BaseUserCreate):
-    name: str
+class UserCreate(CreateUpdateDictModel): #override để bỏ các trươngf k cần
+    name :str
+    email: EmailStr
+    password: str
 
 
 class UserUpdate(schemas.BaseUserUpdate):

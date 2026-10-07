@@ -7,7 +7,7 @@ from app.core.config import settings
 from fastapi import Depends
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_db
+from app.core.database import get_db
 
 SECRET = settings.SECRET_KEY
 
@@ -34,7 +34,7 @@ async def get_user_manager(user_db = Depends(get_user_db)): #dùng để đưa c
 
 #===============================================
 #token
-bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
+bearer_transport = BearerTransport(tokenUrl="api/auth/login") # dùng route trùng với endpont đăng kí để dùng form login
 
 def get_jwt_strategy()->JWTStrategy: # bên trong chứa jwt.encode/decode.verify...
     return JWTStrategy(secret=SECRET,lifetime_seconds=36000)
@@ -46,5 +46,5 @@ auth_backend=AuthenticationBackend( # cách xác thực(jwt)
 )
 #User,uuid.UUID báo pk là uuid
 fastapi_users = FastAPIUsers[User,uuid.UUID](get_user_manager,[auth_backend])# cách xác thực
-current_active_user = fastapi_users.current_user(active=True)# lấy ra user hiện tại trong db thông qua đọc token và decode-verify
+current_active_user = fastapi_users.current_user(active=True)# trả về user hiện tại trong db thông qua đọc token và decode-verify
 current_superuser = fastapi_users.current_user(active=True,superuser=True) #lấy ra user hiện tại và check superuser chỉ superuser mới dùng đc route này

@@ -1,8 +1,8 @@
-"""create db post
+"""create
 
-Revision ID: 65e102d81756
+Revision ID: 03734b9cf825
 Revises: 
-Create Date: 2026-09-30 18:39:15.255096
+Create Date: 2026-10-07 18:44:45.894408
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '65e102d81756'
+revision: str = '03734b9cf825'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,6 +29,8 @@ def upgrade() -> None:
     sa.Column('file_name', sa.String(length=255), nullable=False),
     sa.Column('file_size', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('user_id', sa.Uuid(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_posts_id'), 'posts', ['id'], unique=False)

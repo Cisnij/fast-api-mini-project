@@ -113,6 +113,25 @@ ORM của async:
     await db.commit()
     → xóa Todo
 
+    select(Book).where(Book.author.has(Author.name="ABC"))
+        -> truy cập từ model này sang model khác nếu có FK(1 Author -> n Book)
+
+    select(Book).where(Book.title.ilike(f"%keyword%")
+        -> câu lệnh tìm kiếm gần chính xác LIKE '%abc%'
+
+    1-1/n-1 -> select_related = joinedload() // ví dụ select(Post).options(joinedload(Post.user)).where(Post.id == id)
+        -> lấy từng post từ đó lấy ra user, có left join on user.id = post.user_id và lặp cho đến khi hết post -> 1 query
+
+    1-1 -> select(Post).join(Post.user).where(User.id == 5)
+        -> chỉ dùng để lọc ví dụ chỉ lấy post mà có user = 5 // lấy giá trị khớp ở 2 bảng là post có user_id = 5 và user có user_id = 5
+
+    "join khác left join là join chỉ lấy 2 bảng thỏa hết điều kiện join(ví dụ on user.id = post.user_id, null ở 1 trong 2 thì k lấy)
+     LEFT JOIN giữ tất cả row của bảng bên trái thỏa WHERE. Bảng bên phải chỉ được lấy dữ liệu nếu thỏa điều kiện ON; ví dụ lấy post 1 thì lấy user 1, lấy post 2 kể cả user là null vì post vẫn thỏa where(ví dụ join, nếu user là null thì k lấy post đc dù post đó thỏa)
+    "
+
+    1-n/n-n -> prefetch_related = selectinload() // select(Post).options(selectinload(Post.user))
+        -> lấy tất cả từ post trước, sau đó đem post.user_id đó tìm trong bảng user lấy ra thông tin -> 2 query
+
     mối quan hệ phàn thân:
     class Message(Base):
         __tablename__ = "messages"
