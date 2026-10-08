@@ -130,7 +130,7 @@ ORM của async:
     "
 
     1-n/n-n -> prefetch_related = selectinload() // select(Post).options(selectinload(Post.user))
-        -> lấy tất cả từ post trước, sau đó đem post.user_id đó tìm trong bảng user lấy ra thông tin -> 2 query
+        -> lấy post_id trước ví dụ 1,2,3, sau đó đem các giá trị post_id từ query đó tìm trong bảng user có post_id=1,2,3 lấy ra thông tin -> 2 query
 
     mối quan hệ phàn thân:
     class Message(Base):

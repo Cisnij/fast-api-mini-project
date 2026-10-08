@@ -1,12 +1,15 @@
 import uuid
+from typing import List
+
 from fastapi import UploadFile, File, Form, Depends, APIRouter,status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.posts.models import Post
-from app.posts.schema import PostResponse
-from app.posts.services import create_post_service, get_feed_service, delete_post_service
+from app.posts.schema import PostResponse, PostUserResponse
+from app.posts.services import create_post_service, get_feed_service, delete_post_service, get_user_posts_services
 from app.users.models import User
 from app.users.manager import current_active_user
+
 
 router = APIRouter()
 
@@ -27,4 +30,8 @@ async def get_feed(db : AsyncSession = Depends(get_db), user:User = Depends(curr
 @router.delete("/post/{id}/",status_code = status.HTTP_204_NO_CONTENT)
 async def delete_post(id: uuid.UUID, db: AsyncSession = Depends(get_db), user:User = Depends(current_active_user)):
     return await delete_post_service(id,db,user.id)
+
+@router.get('/user/feed/{id}/', response_model=List[PostUserResponse] , status_code= status.HTTP_200_OK)
+async def get_user_posts(id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    return await get_user_posts_services(id, db)
 

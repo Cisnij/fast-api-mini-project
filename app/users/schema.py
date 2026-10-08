@@ -4,6 +4,7 @@ from fastapi_users.schemas import CreateUpdateDictModel
 from pydantic import EmailStr, BaseModel
 
 class UserRead(BaseModel):
+    id: uuid.UUID
     name: str
     email: EmailStr
     class Config:

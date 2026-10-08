@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from app.users.manager import current_active_user
 from app.posts.models import Post
-from app.posts.selectors import get_feed_selectors
+from app.posts.selectors import get_feed_selectors, get_user_posts_selectors
 from app.posts.exceptions import FileValidateException, PostUnauthorized
 from app.posts.images import imagekit, upload_to_imagekit
 from app.posts.selectors import get_post_selectors
@@ -65,3 +65,7 @@ async def delete_post_service(id:uuid.UUID, db:AsyncSession, user_id: uuid.UUID)
     await db.delete(post)
     await db.commit()
     return HTTPException(status_code=status.HTTP_204_NO_CONTENT,detail="Post deleted")
+
+
+async def get_user_posts_services(id: uuid.UUID, db: AsyncSession):
+    return await get_user_posts_selectors(id, db)
