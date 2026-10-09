@@ -9,7 +9,8 @@ from app.posts.selectors import get_feed_selectors, get_user_posts_selectors
 from app.posts.exceptions import FileValidateException, PostUnauthorized
 from app.posts.images import imagekit, upload_to_imagekit
 from app.posts.selectors import get_post_selectors
-from app.posts.schema import PostResponse
+from app.posts.schema import PostResponse, PostUpdate
+from app.users.models import User
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "video/mp4"} # IME/định dạng
 MAX_FILE_SIZE = 50 * 1024 * 1024 #50mb
@@ -67,5 +68,27 @@ async def delete_post_service(id:uuid.UUID, db:AsyncSession, user_id: uuid.UUID)
     return HTTPException(status_code=status.HTTP_204_NO_CONTENT,detail="Post deleted")
 
 
-async def get_user_posts_services(id: uuid.UUID, db: AsyncSession):
+async def get_user_posts_services(id: uuid.UUID, db: AsyncSession, skip:int , limit: int):
     return await get_user_posts_selectors(id, db)
+
+async def get_detail_service(id: uuid.UUID, db:AsyncSession, user:User):
+    post = await get_post_selectors(id,db)
+    return PostResponse(
+        id=post.id,
+        content=post.content,
+        url=post.url,
+        file_type=post.file_type,
+        file_name=post.file_name,
+        file_size=post.file_size,
+        created_at=post.created_at,
+        is_owner=(post.user_id == user.id),  # field tự thêm
+        users=post.users
+    )
+async def update_post_service(data:PostUpdate, id:int, db: AsyncSession, user: User)-> Post:
+    post = await get_post_selectors(id,db)
+    if post.user_id != user.id:
+        raise PostUnauthorized()
+    post.content = data.content
+    db.add(post)
+    await db.commit()
+    return post

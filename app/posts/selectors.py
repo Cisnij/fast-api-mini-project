@@ -24,12 +24,14 @@ async def get_post_selectors(id:uuid.UUID, db: AsyncSession) ->Post:
         raise PostNotFound()
     return post
 
-async def get_user_posts_selectors(id: uuid.UUID, db:AsyncSession) -> List[Post]:
+async def get_user_posts_selectors(id: uuid.UUID, db:AsyncSession, skip:int , limit:int) -> List[Post]:
     query = await db.execute(
         select(Post)
         .options(joinedload(Post.users))
         .filter(Post.user_id == id)
         .order_by(Post.created_at.desc())
+        .offset(skip)
+        .limit(limit)
     )
     return query.scalars().all()
-    
+

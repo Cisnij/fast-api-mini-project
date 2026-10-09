@@ -27,3 +27,6 @@ class PostUserResponse(BaseModel):
     created_at: datetime
     class Config:
         from_attributes = True
+
+class PostUpdate(BaseModel):
+    content:str

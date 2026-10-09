@@ -5,8 +5,9 @@ from fastapi import UploadFile, File, Form, Depends, APIRouter,status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.posts.models import Post
-from app.posts.schema import PostResponse, PostUserResponse
-from app.posts.services import create_post_service, get_feed_service, delete_post_service, get_user_posts_services
+from app.posts.schema import PostResponse, PostUserResponse, PostUpdate
+from app.posts.services import create_post_service, get_feed_service, delete_post_service, get_user_posts_services, \
+    get_detail_service, update_post_service
 from app.users.models import User
 from app.users.manager import current_active_user
 
@@ -32,6 +33,13 @@ async def delete_post(id: uuid.UUID, db: AsyncSession = Depends(get_db), user:Us
     return await delete_post_service(id,db,user.id)
 
 @router.get('/user/feed/{id}/', response_model=List[PostUserResponse] , status_code= status.HTTP_200_OK)
-async def get_user_posts(id: uuid.UUID, db: AsyncSession = Depends(get_db)):
-    return await get_user_posts_services(id, db)
+async def get_user_posts(id: uuid.UUID, db: AsyncSession = Depends(get_db), user:User = Depends(current_active_user), skip:int = 0, limit :int =20):
+    return await get_user_posts_services(id, db, skip, limit)
 
+@router.get("/post/{id}", response_model=PostResponse, status_code= status.HTTP_200_OK)
+async def get_detail_post(id: uuid.UUID, db: AsyncSession = Depends(get_db), user:User = Depends(current_active_user)):
+    return await get_detail_service(id,db, user)
+
+@router.put('/post/{id}/',status_code=status.HTTP_201_CREATED, response_model=PostUserResponse)
+async def update_post(data: PostUpdate ,id: uuid.UUID, db: AsyncSession = Depends(get_db), user:User = Depends(current_active_user)):
+    return await update_post_service(data,id,db,user)
