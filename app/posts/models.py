@@ -1,7 +1,7 @@
 import datetime
 import uuid
 
-from sqlalchemy import Integer, Column, Text, String, DateTime, ForeignKey
+from sqlalchemy import Integer, Column, Text, String, DateTime, ForeignKey, Index
 from sqlalchemy.orm import Relationship
 from fastapi_users_db_sqlalchemy.generics import GUID
 from app.users.models import User
@@ -24,7 +24,9 @@ class Post(Base):
     user_id = Column(GUID,ForeignKey("users.id"),nullable=False) #users.id phải theo tên bảng là users
     
     # cách gộp index để tối ưu nếu filter nhiều field
-    # __table_args__ = (
+    __table_args__ = (
         # tên idex + cột
-    #     Index("ix_user_published", "user_id", "published"),   # composite index, giống models.Index nhiều field
-    # )
+        Index("ix_user_id_created_at", "user_id", "created_at"),   # composite index, giống models.Index nhiều field
+    )
+
+    

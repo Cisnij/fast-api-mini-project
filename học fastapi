@@ -14,7 +14,7 @@ myproject/
 │   │   └── router.py                # Gộp toàn bộ router con lại (tương đương urls.py gốc Django)
 │   │
 │   ├── donate/                       # MỖI DOMAIN 1 THƯ MỤC — tương đương "app" trong Django
-        ├── __init__.py
+        ├── __init__.py                 #gom các file cần import để khỏi cần import nếu nhiều file dùng
 │   │   ├── router.py                  # Endpoint (tương đương views.py)
 │   │   ├── models.py                  # SQLAlchemy models
 │   │   ├── schemas.py                 # Pydantic schemas (tương đương serializers.py)
