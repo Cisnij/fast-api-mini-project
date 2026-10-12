@@ -1,0 +1,13 @@
+Làm 1 dự án
+Khi thêm 1 chức năng:
+    git checkout main
+    git pull origin main : để lấy code mới nhất
+    git checkout -b feature/abc
+    git add
+    git commit
+    git push
+
+Nếu khi thêm 1 chức năng mà main thay đổi thì: đứng ở nhánh feature gọi
+    git fetch origin: kiểm tra main thay đổi gì
+    git merge origin/main: gộp main vào nhánh feature
+    sau đó code xong thì git push

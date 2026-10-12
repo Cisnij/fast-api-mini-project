@@ -69,7 +69,7 @@ async def delete_post_service(id:uuid.UUID, db:AsyncSession, user_id: uuid.UUID)
 
 
 async def get_user_posts_services(id: uuid.UUID, db: AsyncSession, skip:int , limit: int):
-    return await get_user_posts_selectors(id, db)
+    return await get_user_posts_selectors(id, db,skip, limit)
 
 async def get_detail_service(id: uuid.UUID, db:AsyncSession, user:User):
     post = await get_post_selectors(id,db)
