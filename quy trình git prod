@@ -11,3 +11,18 @@ Nếu khi thêm 1 chức năng mà main thay đổi thì: đứng ở nhánh fea
     git fetch origin: kiểm tra main thay đổi gì
     git merge origin/main: gộp main vào nhánh feature
     sau đó code xong thì git push
+
+=====
+tùy chọn merge
+    create a merge commit: giữ nguyên lịch sử 2 branch có chia nhánh
+        main A-B
+        feature C-D
+        merge A-B-C-D-S(S là commit gộp)
+    squash and merge: gộp toàn bộ commit của branch feature thành 1 commit trên branch chính
+        main A-B
+        feature C-D
+        merge A-B-S(C+D)
+    rebase and merge: giữ commit 2 branch theo đường thẳng
+        main A-B
+        feature C-D
+        merge A-B-C'-D'

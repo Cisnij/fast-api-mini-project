@@ -40,4 +40,6 @@ async def update_comment_service(data: CommentUpdate,comment_id:uuid.UUID, db:As
     if not comment.user_id == user.id:
         raise CommentUnauthorized()
     comment.content = data.content
+    db.add(comment)
+    await db.commit()
     return comment
