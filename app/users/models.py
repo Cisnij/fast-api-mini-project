@@ -11,6 +11,7 @@ class User(SQLAlchemyBaseUserTableUUID,Base): #SQLAlchemyBaseUserTableUUID dùng
     __tablename__ = "users"
     name = Column(String(255), nullable=False)
     posts = relationship("Post",back_populates="users")
+    comments = relationship("Comment",back_populates="user")
 
 # class RefreshToken(Base):
 #     __tablename__ = 'refresh_tokens'

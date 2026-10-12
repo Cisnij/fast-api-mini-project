@@ -24,6 +24,7 @@ if config.config_file_name is not None:
 from app.core.database import Base
 from app.posts.models import *
 from app.users.models import *
+from app.comments.models import *
 target_metadata = Base.metadata
 #=========================================================
 

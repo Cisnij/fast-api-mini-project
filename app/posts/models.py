@@ -2,7 +2,7 @@ import datetime
 import uuid
 
 from sqlalchemy import Integer, Column, Text, String, DateTime, ForeignKey, Index
-from sqlalchemy.orm import Relationship
+from sqlalchemy.orm import relationship
 from fastapi_users_db_sqlalchemy.generics import GUID
 from app.users.models import User
 from app.core.database import Base
@@ -20,9 +20,10 @@ class Post(Base):
     file_size = Column(Integer,nullable=False)
     created_at = Column(DateTime,default=datetime.now)
 
-    users= Relationship("User",back_populates="posts") # back_populates phải đúng tên field của posts = relationship("Post",back_populates="users")
+    users= relationship("User",back_populates="posts") # back_populates phải đúng tên field của posts = relationship("Post",back_populates="users"). Có nghĩa tên field bên này là tên back_populate bên kia và ngc lại
     user_id = Column(GUID,ForeignKey("users.id"),nullable=False) #users.id phải theo tên bảng là users
-    
+
+    comments = relationship('Comment',back_populates="post")
     # cách gộp index để tối ưu nếu filter nhiều field
     __table_args__ = (
         # tên idex + cột
