@@ -101,11 +101,21 @@ async def get_detail_service(id: uuid.UUID, db:AsyncSession, user:User):
         total_reactions= len(post.reactions),
         reactions_users= [reaction.user for reaction in post.reactions]
     )
-async def update_post_service(data:PostUpdate, id:int, db: AsyncSession, user: User)-> Post:
+async def update_post_service(data:PostUpdate, id:int, db: AsyncSession, user: User):
     post = await get_post_selectors(id,db)
     if post.user_id != user.id:
         raise PostUnauthorized()
     post.content = data.content
     db.add(post)
     await db.commit()
-    return post
+    return PostUserResponse(
+        id=post.id,
+        content=post.content,
+        url=post.url,
+        file_type=post.file_type,
+        file_name=post.file_name,
+        file_size=post.file_size,
+        created_at=post.created_at,
+        total_reactions=len(post.reactions),
+        reactions_users=[reaction.user for reaction in post.reactions]
+    )
