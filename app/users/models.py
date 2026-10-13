@@ -10,9 +10,9 @@ from sqlalchemy import Uuid,DateTime,Boolean,String,Column
 class User(SQLAlchemyBaseUserTableUUID,Base): #SQLAlchemyBaseUserTableUUID dùng này cho uuid
     __tablename__ = "users"
     name = Column(String(255), nullable=False)
-    posts = relationship("Post",back_populates="users")
-    comments = relationship("Comment",back_populates="user")
-
+    posts = relationship("Post",back_populates="users") #User.posts lấy tất cả post của user, posts.user lấy user của post có id
+    comments = relationship("Comment",back_populates="user")#User.comments lấy tất cả comments của user, comments.user lấy user của comments có id
+    reactions = relationship("Reaction",back_populates="user")#User.reactions lấy tất cả reactions của user, reactions.user lấy user của reactions có id
 # class RefreshToken(Base):
 #     __tablename__ = 'refresh_tokens'
 #     id = Column(Uuid, primary_key=True, default= uuid.uuid4)

@@ -256,3 +256,12 @@ db.flush(): dùng để có được dữ liệu cần có mà chưa cần commi
         db.commit()   # chốt CẢ HAI cùng lúc: todo và log
 
         # autoflush=True : SQLAlchemy TỰ ĐỘNG gọi flush() TRƯỚC dòng query()
+
+-cách dùng signal bên fast api
+    ví dụ:
+        async def create_comment_service(...):
+            comment = Comment(...)
+            db.add(comment)
+            await db.commit()
+            await create_notification(db, comment)    # gọi tường minh, mỗi lần tạo comment sẽ tạo notification
+            return comment

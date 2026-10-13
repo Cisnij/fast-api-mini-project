@@ -23,7 +23,8 @@ class Post(Base):
     users= relationship("User",back_populates="posts") # back_populates phải đúng tên field của posts = relationship("Post",back_populates="users"). Có nghĩa tên field bên này là tên back_populate bên kia và ngc lại
     user_id = Column(GUID,ForeignKey("users.id"),nullable=False) #users.id phải theo tên bảng là users
 
-    comments = relationship('Comment',back_populates="post")
+    comments = relationship('Comment',back_populates="post") # post.comments lấy tất cả comments của post | comments.post lấy post có comment id đó
+    reactions = relationship("Reaction",back_populates="post") #Post.reactions lấy ra tất cả reactions của post đó | reactions.post lấy ra post  có reaction id đó
     # cách gộp index để tối ưu nếu filter nhiều field
     __table_args__ = (
         # tên idex + cột

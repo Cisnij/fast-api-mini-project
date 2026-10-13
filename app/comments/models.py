@@ -17,8 +17,8 @@ class Comment(Base):
     post_id = Column(GUID, ForeignKey("posts.id"), nullable=False)
 
     #tên field bên này là tên back_populate bên kia và ngc lại, tất cả bên Post và User phải đặt back_populate là user à post
-    user = relationship('User', back_populates="comments") # User.comments lấy ra tất cả comment của user
-    post = relationship('Post', back_populates="comments")
+    user = relationship('User', back_populates="comments") # User.comments lấy ra tất cả comment của user, comments.user lấy ra user có comment có id
+    post = relationship('Post', back_populates="comments") # post.comments lấy ra tất cả comment của post, comments.post lấy ra post có comment có id
 
     __table_args__ = (
         Index('idx_post_id_created_at','post_id','created_at'),

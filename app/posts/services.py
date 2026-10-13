@@ -9,7 +9,7 @@ from app.posts.selectors import get_feed_selectors, get_user_posts_selectors
 from app.posts.exceptions import FileValidateException, PostUnauthorized
 from app.posts.images import imagekit, upload_to_imagekit
 from app.posts.selectors import get_post_selectors
-from app.posts.schema import PostResponse, PostUpdate
+from app.posts.schema import PostResponse, PostUpdate, PostUserResponse
 from app.users.models import User
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "video/mp4"} # IME/định dạng
@@ -53,7 +53,9 @@ async def get_feed_service(db: AsyncSession, user_id : uuid.UUID,skip:int, limit
             file_size=post.file_size,
             created_at=post.created_at,
             is_owner=(post.user_id == user_id), #field tự thêm
-            users = post.users
+            users = post.users,
+            total_reactions= len(post.reactions), # đếm tổng số reaction của post
+            reactions_users= [reaction.user for reaction in post.reactions] # láy ra tất cả user từ tất cả reaction trong post
         )
         for post in posts
     ]
@@ -69,7 +71,20 @@ async def delete_post_service(id:uuid.UUID, db:AsyncSession, user_id: uuid.UUID)
 
 
 async def get_user_posts_services(id: uuid.UUID, db: AsyncSession, skip:int , limit: int):
-    return await get_user_posts_selectors(id, db,skip, limit)
+    posts = await get_user_posts_selectors(id, db,skip, limit)
+    return [PostUserResponse(
+        id=post.id,
+        content=post.content,
+        url=post.url,
+        file_type=post.file_type,
+        file_name=post.file_name,
+        file_size=post.file_size,
+        created_at=post.created_at,
+        total_reactions= len(post.reactions),
+        reactions_users= [reaction.user for reaction in post.reactions]
+    )
+        for post in posts
+    ]
 
 async def get_detail_service(id: uuid.UUID, db:AsyncSession, user:User):
     post = await get_post_selectors(id,db)
@@ -82,7 +97,9 @@ async def get_detail_service(id: uuid.UUID, db:AsyncSession, user:User):
         file_size=post.file_size,
         created_at=post.created_at,
         is_owner=(post.user_id == user.id),  # field tự thêm
-        users=post.users
+        users=post.users,
+        total_reactions= len(post.reactions),
+        reactions_users= [reaction.user for reaction in post.reactions]
     )
 async def update_post_service(data:PostUpdate, id:int, db: AsyncSession, user: User)-> Post:
     post = await get_post_selectors(id,db)
