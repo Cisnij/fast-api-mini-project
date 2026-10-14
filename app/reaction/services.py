@@ -2,6 +2,7 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.notifications.services import create_notifications
 from app.posts.selectors import get_post_selectors
 from app.reaction.models import Reaction
 from app.reaction.schema import ReactionResponse
@@ -20,6 +21,8 @@ async def toogle_reaction_services(post_id:uuid.UUID,db:AsyncSession, user:User)
         db.add(reaction)
         await db.commit()
         status = 'add'
+        if post.user_id == user.id: # không thông báo cho mình nếu mình là chủ post thả cảm xúc
+            await create_notifications(post.id, db, user)
     else:
         await db.delete(reaction)
         await db.commit()

@@ -14,8 +14,8 @@ class Reaction(Base): # bảng nhiều-nhiều
     __tablename__ = 'reactions'
     id = Column(GUID, primary_key=True, default=uuid.uuid4, index=True)
 
-    user_id = Column(GUID,ForeignKey("users.id"),nullable=False)
-    post_id = Column(GUID,ForeignKey("posts.id"),nullable=False)
+    user_id = Column(GUID,ForeignKey("users.id",ondelete ="CASCADE"),nullable=False)
+    post_id = Column(GUID,ForeignKey("posts.id",ondelete ="CASCADE"),nullable=False)
     user = relationship("User", back_populates="reactions") # reaction.user là lấy user của reaction đó
     post = relationship("Post", back_populates="reactions")#reaction.post lấy tất cả post thuộc reaction id này
 

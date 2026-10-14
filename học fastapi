@@ -37,6 +37,7 @@ myproject/
 │       ├── schemas.py
 │       └── service.py
 │       ├── selectors.py
+        |---Websocket.py
 ├── tests/
 │   ├── test_donate.py
 │
@@ -133,32 +134,49 @@ ORM của async:
         -> lấy post_id trước ví dụ 1,2,3, sau đó đem các giá trị post_id từ query đó tìm trong bảng user có post_id=1,2,3 lấy ra thông tin -> 2 query
 
     mối quan hệ phàn thân:
-    class Message(Base):
-        __tablename__ = "messages"
-        reply_to_id = Column(
-            ForeignKey("messages.id"),
-            nullable=True
-        )
+        class Message(Base):
+            __tablename__ = "messages"
+            reply_to_id = Column(
+                ForeignKey("messages.id"),
+                nullable=True
+            )
 
-        reply_to = relationship(
-            "Message",
-            remote_side=[id] # phân biệt id nào đc trỏ tới ví dụ A reply B là trỏ tới A
-        )
+            reply_to = relationship(
+                "Message",
+                remote_side=[id] # phân biệt id nào đc trỏ tới ví dụ A reply B là trỏ tới A
+            )
 
     mối quan hệ M-M
-    class Follow(Base):
-        __tablename__ = "follows"
+        class Follow(Base):
+            __tablename__ = "follows"
 
-        follower_id = Column(
-            ForeignKey("users.id", ondelete="CASCADE"),
-            primary_key=True,
-        )
+            follower_id = Column(
+                ForeignKey("users.id", ondelete="CASCADE"),
+                primary_key=True,
+            )
 
-        following_id = Column(
-            ForeignKey("users.id", ondelete="CASCADE"),
-            primary_key=True,
-        )
+            following_id = Column(
+                ForeignKey("users.id", ondelete="CASCADE"),
+                primary_key=True,
+            )
 
+    ondelete trong sqlalchemy:
+        1 post - n comment
+        quy tắc ondelete đặt ở model con
+       - ondelete="CASCADE" = models.PROTECT : xóa cha thì xóa con, có dùng cascade ở cha
+       - ondelete="SET NULL" : xóa cha thì con để là Null, k dùng cascade ở cha
+       - ondelete="RESTRICT" : xóa cha k được nếu còn con, k dùng cascade
+
+        class Comment(Base):
+            post_id = Column(Uuid, ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)   # tầng DB
+
+        class Post(Base):
+            comments = relationship(
+                "Comment", back_populates="post",
+                cascade="all, delete-orphan",   # tầng ORM
+                passive_deletes=True,           # ORM đừng nạp con, để DB xóa
+            )
+    1-1 trong sqlalchemy giống 1-n thằng n chứa khóa chính thằng 1 mà khóa ngoại có unique để chỉ chứa 1 bản ghi -> 1-1
 - alembic:
     1.pip install alembic
     2.alembic init alembic cho sync hoặc alembic init -t async alembic nếu async
@@ -258,6 +276,7 @@ db.flush(): dùng để có được dữ liệu cần có mà chưa cần commi
         # autoflush=True : SQLAlchemy TỰ ĐỘNG gọi flush() TRƯỚC dòng query()
 
 -cách dùng signal bên fast api
+    async là 1 process có thể xử lý nhiều request. Ví dụ request A gọi tới db thì chờ trả process sẽ chạy request B
     ví dụ:
         async def create_comment_service(...):
             comment = Comment(...)

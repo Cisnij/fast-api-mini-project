@@ -26,7 +26,7 @@ from app.posts.models import *
 from app.users.models import *
 from app.comments.models import *
 from app.reaction.models import *
-
+from app.notifications.models import *
 target_metadata = Base.metadata
 #=========================================================
 
