@@ -21,7 +21,7 @@ async def toogle_reaction_services(post_id:uuid.UUID,db:AsyncSession, user:User)
         db.add(reaction)
         await db.commit()
         status = 'add'
-        if post.user_id == user.id: # không thông báo cho mình nếu mình là chủ post thả cảm xúc
+        if post.user_id != user.id: # không thông báo cho mình nếu mình là chủ post thả cảm xúc
             await create_notifications(post.id, db, user)
     else:
         await db.delete(reaction)
